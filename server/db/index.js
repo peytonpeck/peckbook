@@ -12,6 +12,7 @@ types.setTypeParser(1700, val => parseFloat(val));
 const {
   DB_PORT = '5432',
   DB_HOST_NAME = 'localhost',
+  POSTGRES_DB = 'plaid_pattern',
   POSTGRES_USER = 'postgres',
   POSTGRES_PASSWORD = 'password',
 } = process.env;
@@ -20,7 +21,7 @@ const {
 const db = new Pool({
   host: DB_HOST_NAME,
   port: DB_PORT,
-  database: 'plaid_pattern',
+  database: POSTGRES_DB,
   user: POSTGRES_USER,
   password: POSTGRES_PASSWORD,
   max: 5,

@@ -1,6 +1,6 @@
 envfile := ./.env
 
-.PHONY: help install db-create db-reset sql server client ngrok
+.PHONY: help install db-create db-down db-logs db-reset sql server client ngrok
 
 TARGET_MAX_CHAR_NUM=20
 
@@ -26,18 +26,26 @@ install: $(envfile)
 	cd client && npm install
 	cd server && npm install
 
-## Initialize the database (create tables)
+## Start the Docker Postgres database and initialize tables on its first run
 db-create:
-	psql -U postgres -c 'CREATE DATABASE plaid_pattern' 2>/dev/null; psql -U postgres -d plaid_pattern -f database/init/create.sql
+	docker compose up -d --wait postgres
 
-## Drop and recreate the database
+## Stop the Docker Postgres database (data is retained)
+db-down:
+	docker compose down
+
+## Follow Docker Postgres logs
+db-logs:
+	docker compose logs -f postgres
+
+## Delete all Docker Postgres data, then recreate the database and tables
 db-reset:
-	psql -U postgres -c 'DROP DATABASE IF EXISTS plaid_pattern'
-	$(MAKE) db-create
+	docker compose down -v
+	docker compose up -d --wait postgres
 
-## Start an interactive psql session
+## Start an interactive psql session in the Docker Postgres container
 sql:
-	psql -U postgres -d plaid_pattern
+	docker compose exec postgres sh -c 'psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"'
 
 ## Start the server (port 5001)
 server: $(envfile)

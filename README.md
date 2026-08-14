@@ -21,7 +21,7 @@ Plaid Pattern apps are provided for illustrative purposes and are not meant to b
 ## Requirements
 
 -   [Node.js](https://nodejs.org/) v20 or higher
--   [PostgreSQL](https://www.postgresql.org/) v16 or higher
+-   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (includes Docker Compose)
 -   [Plaid API keys][plaid-keys] - [sign up][plaid-signup] for a free Sandbox account if you don't already have one
 -   [ngrok](https://ngrok.com/) to expose the server for Plaid webhooks — [sign up](https://dashboard.ngrok.com/signup) for a free account to get an authtoken
 
@@ -31,15 +31,15 @@ Plaid Pattern apps are provided for illustrative purposes and are not meant to b
 
 **macOS** (with [Homebrew](https://brew.sh/)):
 ```shell
-brew install node postgresql@16
-brew services start postgresql@16
+brew install node
+open -a Docker
 brew install ngrok/ngrok/ngrok
 ```
 
 **Linux / WSL (Debian/Ubuntu)**:
 ```shell
-sudo apt update && sudo apt install -y nodejs npm postgresql
-sudo systemctl start postgresql
+sudo apt update && sudo apt install -y nodejs npm docker.io docker-compose-plugin
+sudo systemctl enable --now docker
 snap install ngrok  # or download from https://ngrok.com/download
 ```
 
@@ -63,14 +63,9 @@ Note: We recommend running these commands in a unix terminal. Windows users can 
     ```shell
     npm run install:all
     ```
-1. Set up the database. Create a `postgres` superuser if one doesn't exist, then create and initialize the `plaid_pattern` database.
+1. Start the database. Docker creates the `plaid_pattern` database and runs the schema in `database/init/create.sql` the first time its volume is created.
     ```shell
-    createuser -s postgres  # skip if the postgres role already exists
     npm run db:create
-    ```
-    On Linux/WSL, if your PostgreSQL requires a password, set one for the `postgres` role and update `POSTGRES_PASSWORD` in `.env` to match:
-    ```shell
-    psql -U postgres -c "ALTER USER postgres PASSWORD 'password';"
     ```
 1. Configure ngrok with your authtoken (one-time setup):
     ```shell
@@ -91,8 +86,11 @@ Note: We recommend running these commands in a unix terminal. Windows users can 
 | `npm run install:all` | Install client and server dependencies |
 | `npm run server` | Start the backend server |
 | `npm run client` | Start the frontend dev server |
-| `npm run db:create` | Initialize the database tables |
-| `npm run db:reset` | Drop and recreate all tables |
+| `npm run db:create` | Start the Docker Postgres database and initialize it on first run |
+| `npm run db:down` | Stop the database while retaining its data |
+| `npm run db:logs` | Follow PostgreSQL container logs |
+| `npm run db:shell` | Open `psql` in the database container |
+| `npm run db:reset` | Delete Docker database data and recreate all tables |
 
 ## Architecture
 
